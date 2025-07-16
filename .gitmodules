@@ -1,6 +1,6 @@
 [submodule "app"]
 	path = app
-	url = https://github.com/Lee266/next-password-manager-app/tree/develop
+	url = https://github.com/lee266/next-password-manager-app.git
 [submodule "api"]
 	path = api
-	url = https://github.com/Lee266/next-password-manager-api/tree/develop
+	url = https://github.com/lee266/next-password-manager-api.git
