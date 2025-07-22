@@ -1,0 +1,36 @@
+@startuml サーバー構成
+
+!include <awslib/AWSCommon>
+' !include <awslib/AWSSimplified>
+!include <awslib/Compute/EC2>
+!include <awslib/Compute/Lambda>
+!include <awslib/Groups/AWSCloud>
+!include <awslib/General/Users>
+!include <awslib/ApplicationIntegration/EventBridge>
+
+title Password Manager Infrastructure (Cloudflare + Vercel + AWS)
+
+Users(users, "利用者", "")
+
+package "Cloudflare" {
+  component "DNS/Proxy" as cloudflare_dns
+}
+
+package "Vercel" {
+  component "Frontend App\n(password-manager.rito-dev.com)" as vercel_app
+}
+
+AWSCloudGroup(aws) {
+  ' VPCは省略
+  EC2(ec2_backend, "API Server", "password-manager-api.rito-dev.com")
+  Lambda(lambda_func, "Lambda Function", "")
+  EventBridge(eventbridge, "EventBridge", "")
+  eventbridge -> lambda_func : Scheduled Event
+  lambda_func -> ec2_backend : Start/Stop EC2 control
+}
+
+users --> cloudflare_dns : Access\n(password-manager.rito-dev.com)
+cloudflare_dns --> vercel_app : Routing
+cloudflare_dns --> ec2_backend : Routing
+vercel_app --> cloudflare_dns : API Request\n(password-manager.rito-dev.com)
+@enduml

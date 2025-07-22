@@ -9,23 +9,30 @@ This is a Password Manager Application.
 ### Git Clone
 
 Please git clone This repository
-This repository use submodule So, Please git clone under the repositories  
-next-password-manager-app(https://github.com/Lee266/next-password-manager-app.git)  
-next-password-manager-api(https://github.com/Lee266/next-password-manager-api/tree/develop)
+This repository use submodule So, Please git clone under the repositories
+next-password-manager-app(<https://github.com/lee266/next-password-manager-app.git>)
+next-password-manager-api(<https://github.com/lee266/next-password-manager-api.git>)
 
 ```sh
-git clone https://github.com/Lee266/next-password-manager-monorepo.git
+git clone https://github.com/lee266/next-password-manager-monorepo.git
+cd next-password-manager-monorepo
+
+# Clone frontend
 cd app
-git clone https://github.com/Lee266/next-password-manager-app.git
+git clone https://github.com/lee266/next-password-manager-app.git
+
+# Clone backend
 cd ../api
-git clone https://github.com/Lee266/next-password-manager-api.git
+git clone https://github.com/lee266/next-password-manager-api.git
 ```
 
 ### Active Project
 
-Please copy env
+Please copy .env　and write .env file
 
 ```sh
+cp .env.example .env
+cd api
 cp .env.example .env
 ```
 
@@ -33,6 +40,8 @@ To launch the project using Docker, run the following command:
 
 ```sh
 docker compose up -d --build
+# Then, apply database migrations (only required on first run)
+docker compose exec -T django python manage.py migrate
 ```
 
 This command initializes and starts the containers necessary for both the frontend and backend components.
@@ -51,6 +60,10 @@ This command initializes and starts the containers necessary for both the fronte
 - Builders
   - Vercel
   - Render
+
+## Architecture
+
+- Infrastructure diagram: ./ER-diagram/infra.pu
 
 ## hints
 
