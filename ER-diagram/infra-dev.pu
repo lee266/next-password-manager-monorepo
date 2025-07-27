@@ -15,7 +15,7 @@
 !include <awslib/ApplicationIntegration/EventBridge>
 !include <awslib/NetworkingContentDelivery/VPCInternetGateway>
 
-title Password Manager Production Infrastructure (Cloudflare + Vercel + AWS)
+title Password Manager Development Infrastructure (Cloudflare + Vercel + AWS)
 
 Users(users, "利用者", "")
 
@@ -33,16 +33,12 @@ AWSCloudGroup(aws) {
       VPCInternetGateway(igw, "Internet Gateway", "")
       PublicSubnetGroup(subnet1) {
         EC2(ec2_backend, "API Server", "password-manager-api.rito-dev.com")
-      }
-      PrivateSubnetGroup(subnet2) {
-        EC2(ec2_db, "Database Server", "")
         Lambda(lambda_func, "Lambda Function", "")
         EventBridge(eventbridge, "EventBridge", "")
         eventbridge -> lambda_func : Scheduled Event
         lambda_func -> ec2_backend : Start/Stop EC2
       }
-      subnet1 <--> igw : Route via IGW
-      ec2_backend --> ec2_db : DB Query (e.g. MySQL)
+      subnet1 <-> igw : Route via IGW
     }
   }
 }
