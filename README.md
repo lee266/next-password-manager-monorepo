@@ -63,7 +63,8 @@ This command initializes and starts the containers necessary for both the fronte
 
 ## Architecture
 
-- Infrastructure diagram: ./ER-diagram/infra.pu
+- Production infrastructure diagram: ./ER-diagram/infra.pu
+- Development infrastructure diagram: ./ER-diagram/infra-dev.pu
 
 ## hints
 
