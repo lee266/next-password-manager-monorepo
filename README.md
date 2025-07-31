@@ -13,7 +13,7 @@ This repository use submodule So, Please git clone under the repositories
 next-password-manager-app(<https://github.com/lee266/next-password-manager-app.git>)
 next-password-manager-api(<https://github.com/lee266/next-password-manager-api.git>)
 
-```sh
+```bash
 git clone https://github.com/lee266/next-password-manager-monorepo.git
 cd next-password-manager-monorepo
 
@@ -28,9 +28,10 @@ git clone https://github.com/lee266/next-password-manager-api.git
 
 ### Active Project
 
-Please copy .env　and write .env file
+Copy the example environment files and configure them:
 
-```sh
+```bash
+cd app
 cp .env.example .env
 cd api
 cp .env.example .env
@@ -38,7 +39,7 @@ cp .env.example .env
 
 To launch the project using Docker, run the following command:
 
-```sh
+```bash
 docker compose up -d --build
 # Then, apply database migrations (only required on first run)
 docker compose exec -T django python manage.py migrate
