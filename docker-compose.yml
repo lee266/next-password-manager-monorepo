@@ -17,8 +17,8 @@ services:
 
   django:
     build:
-      context: ./
-      dockerfile: api/Dockerfile
+      context: ./api
+      dockerfile: Dockerfile
     container_name: password_django
     command:
       # python manage.py migrate &&
