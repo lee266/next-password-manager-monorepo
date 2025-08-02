@@ -42,7 +42,7 @@ To launch the project using Docker, run the following command:
 ```bash
 docker compose up -d --build
 # Then, apply database migrations (only required on first run)
-docker compose exec -T django python manage.py migrate
+docker compose exec django bash -c "python manage.py migrate && python manage.py superuser && python manage.py inquiry_categories"
 ```
 
 This command initializes and starts the containers necessary for both the frontend and backend components.
