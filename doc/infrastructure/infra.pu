@@ -1,0 +1,88 @@
+@startuml サーバー構成(production)
+
+' Amazon Labs AWSライブラリ: https://plantuml.com/ja/stdlib#a464d2f6236a5c23
+
+!include <awslib/AWSCommon>
+' !include <awslib/AWSSimplified>
+!include <awslib/Compute/EC2>
+!include <awslib/Compute/Lambda>
+!include <awslib/Groups/AWSCloud>
+!include <awslib/Groups/Region>
+!include <awslib/Groups/PublicSubnet>
+!include <awslib/Groups/PrivateSubnet>
+!include <awslib/Groups/VPC>
+!include <awslib/General/Users>
+!include <awslib/ApplicationIntegration/EventBridge>
+!include <awslib/NetworkingContentDelivery/VPCInternetGateway>
+!include <awslib/Containers/ElasticContainerRegistry>
+!include <awslib/Containers/ElasticContainerRegistryRegistry>
+!include <awslib/NetworkingContentDelivery/VPCEndpoints>
+!include <awslib/Storage/SimpleStorageService>
+!include <awslib/ManagementGovernance/SystemsManager>
+
+title Password Manager Production Infrastructure
+
+Users(users, "利用者", "")
+
+package "Cloudflare" {
+  component "DNS/Proxy" as cloudflare_dns
+}
+
+package "Vercel" {
+  component "Frontend App\n(password-manager.rito-dev.com)" as vercel_app
+}
+
+AWSCloudGroup(aws) {
+  RegionGroup(region, "Tokyo") {
+    VPCGroup(vpc, "VPC (10.0.0.0/16)") {
+      VPCInternetGateway(igw, "Internet Gateway", "")
+
+      PublicSubnetGroup(public_subnet) {
+        EC2(ec2_backend, "API Server", "password-manager-api.rito-dev.com")
+      }
+
+      PrivateSubnetGroup(private_subnet) {
+        EC2(ec2_db, "Database Server", "")
+        Lambda(lambda_func, "Lambda Function", "")
+        EventBridge(eventbridge, "EventBridge", "")
+        eventbridge -> lambda_func : Scheduled Event
+        lambda_func -> ec2_backend : Start/Stop EC2
+        lambda_func -> ec2_db : Start/Stop DB
+      }
+
+      ' VPC Endpoints
+      VPCEndpoints(ecr_api_endpoint, "ECR API\nVPC Endpoint", "Interface")
+      VPCEndpoints(ecr_dkr_endpoint, "ECR DKR\nVPC Endpoint", "Interface")
+      VPCInternetGateway(s3_vpc_endpoint, "AWS VPC Endpoint (S3)", "")
+      VPCInternetGateway(ssm_vpc_endpoint, "AWS VPC Endpoint (SSM)", "")
+
+      public_subnet <-> igw : Route via IGW
+      ec2_backend --> ec2_db : DB Query (e.g. MySQL)
+      ec2_backend --> ssm_vpc_endpoint : Get Parameters
+      ec2_db --> ecr_api_endpoint : ECR API Access
+      ec2_db --> ecr_dkr_endpoint : Pull Docker Images
+      ec2_db --> s3_vpc_endpoint : Access S3 Bucket
+      ec2_db --> ssm_vpc_endpoint : Get Parameters
+    }
+
+    ElasticContainerRegistry(ecr, "ECR", "") {
+      ElasticContainerRegistryRegistry(ecr_registry, "ECR Registry", "")
+      ecr_registry -> ecr_api_endpoint
+      ecr_registry -> ecr_dkr_endpoint
+    }
+
+    SimpleStorageService(s3, "S3 Bucket", "Static Assets") {
+      s3 <--- s3_vpc_endpoint : Access via VPC Endpoint
+    }
+
+    SystemsManager(ssm, "SSM Parameter Store", "Configuration Management") {
+      ssm <--- ssm_vpc_endpoint : Access Parameters
+    }
+  }
+}
+
+users --> cloudflare_dns : HTTPS Access\n(password-manager.rito-dev.com)
+cloudflare_dns <--> vercel_app : Routing
+cloudflare_dns <--> vercel_app : API Request\n(password-manager.rito-dev.com)
+cloudflare_dns --> igw : Routing
+@enduml

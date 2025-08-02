@@ -1,9 +1,5 @@
-version: '3'
-
 services:
   next:
-    platform: linux/amd64
-    # platform: linux/x86_64
     build:
       context: ./
       dockerfile: app/Dockerfile
@@ -16,14 +12,13 @@ services:
     container_name: password_next
     volumes:
       - ./app/:/usr/src/app
-    command: yarn dev
+      - /usr/src/app/node_modules
+    tty: true
 
   django:
-    platform: linux/amd64
-    # platform: linux/x86_64
     build:
-      context: ./
-      dockerfile: api/Dockerfile
+      context: ./api
+      dockerfile: Dockerfile
     container_name: password_django
     command:
       # python manage.py migrate &&
@@ -37,8 +32,6 @@ services:
       - database
 
   database:
-    platform: linux/amd64
-    # platform: linux/x86_64
     build:
       context: ./docker/mysql
       dockerfile: Dockerfile
@@ -59,8 +52,6 @@ services:
       - "${HOST_MACHINE_MYSQL_PORT}:3306"
 
   phpmyadmin:
-    platform: linux/amd64
-    # platform: linux/x86_64
     image: phpmyadmin/phpmyadmin
     container_name: password_phpmyadmin
     environment:
